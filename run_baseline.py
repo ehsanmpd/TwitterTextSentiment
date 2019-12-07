@@ -6,7 +6,8 @@ from implementation import *
 
 # from sklearn import linear_model
 from sklearn.linear_model import LogisticRegressionCV
-
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.datasets import load_iris
 
 import nltk
@@ -36,7 +37,7 @@ def test_reg_logistic_regression(X_train,y_train,X_test,k_fold,max_iter):
                      fit_intercept=True, intercept_scaling=1.0, l1_ratios=None,
                      max_iter=max_iter, multi_class='auto', n_jobs=None,
                      penalty='l2', random_state=0, refit=True, scoring=None,
-                     solver='lbfgs', tol=0.0001, verbose=0).fit(X_train, y_train)
+                     solver='liblinear', tol=0.0001, verbose=0).fit(X_train, y_train)
     prediction = clf.predict(X_test)
 
     # print(clf.score(X, y))
@@ -62,19 +63,28 @@ def step1(PIK_train, PIK_test):
     train_pos[0] = train_pos[0].apply(nltk.word_tokenize)
 
     test_data[0] = test_data[0].apply(nltk.word_tokenize)
-    # print(train_neg[0])
+
     #
     df_list_train = [train_neg[0], train_pos[0]]
     full_df_train = pd.concat(df_list_train, ignore_index=True)
     #
-    # shuffling the rows of dataframe
-    full_df_train = full_df_train.sample(frac=1)
-    full_df_test = test_data.sample(frac=1)
-    # print(full_df_test.shape,full_df_test)
     with open(PIK_train, "wb") as f:
         pickle.dump(full_df_train, f)
     with open(PIK_test, "wb") as f:
-        pickle.dump(full_df_test, f)
+        pickle.dump(test_data, f)
+    # print(len(train_neg[0]),len(train_pos[0]),len(test_data),len(df_list_train))
+    return len(train_neg[0]),len(train_pos[0]),len(test_data)
+    # print(train_neg[0])
+    #
+    # train_test_split
+    # df_list_train = [train_neg[0], train_pos[0]]
+    # full_df_train = pd.concat(df_list_train, ignore_index=True)
+    #
+    # shuffling the rows of dataframe
+    # full_df_train = full_df_train.sample(frac=1)
+    # full_df_test = test_data.sample(frac=1)
+    # print(full_df_test.shape,full_df_test)
+
 
 if __name__ == '__main__':
     print("Loading Data...")
@@ -88,24 +98,42 @@ if __name__ == '__main__':
     # nltk.download('punkt')
 
     PIK_train = "step1_train.dat"
-    PIK_test = "step1_train.dat"
+    PIK_test = "step1_test.dat"
     # step1(PIK_train,PIK_test)
 
+    # with open(PIK_train, "rb") as f:
+    #     full_df_train = pickle.load(f)
+    # with open(PIK_test, "rb") as f:
+    #     full_df_test = pickle.load(f)
     with open(PIK_train, "rb") as f:
         full_df_train = pickle.load(f)
-    with open(PIK_test, "rb") as f:
-        full_df_test = pickle.load(f)
+    y_neg = np.zeros(100000)
+    y_pos = np.ones(100000)
+    y_t = np.concatenate((y_neg, y_pos), axis=0)
 
-    print(full_df_train)
+    #
+    # print(full_df_train)
+    full_df_train = full_df_train.map(lambda x:' '.join(x))
+
+    contents = list(full_df_train)
+
+    vectorizer = TfidfVectorizer(stop_words='english', min_df=5)
+    # vectorizer = TfidfVectorizer()
+    train_data = vectorizer.fit_transform(contents)
+    # print(train_data.shape)
+    # creating test train matrixes
+    X_train, X_test, y_train, y_test = train_test_split(train_data, y_t, test_size = 0.2, random_state = 42)
 
     # train_pos, train_neg, test, glove_embedings = load_data()
     # print(train_pos)
     # print("Data Loaded...")
-    exit(0)
-    X, y = load_iris(return_X_y=True)
-    print(y.shape, X.shape)
+    # exit(0)
+    # X, y = load_iris(return_X_y=True)
+    # print(y.shape, X.shape)
 
     # print(y)
-    prediciton = test_reg_logistic_regression(X[21:150,:], y[21:150],X[1:20], k_fold=5,max_iter=500)
-    print(y[1:20])
+    print("running regularized logistic regression")
+    prediciton = test_reg_logistic_regression(X_train=X_train, y_train=y_train, X_test=X_test, k_fold=5,                                    max_iter=500)
     print(prediciton)
+    acc = 100* (np.sum(prediciton == y_test))/ len(y_test)
+    print(acc)
