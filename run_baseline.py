@@ -3,91 +3,42 @@ import pandas as pd
 import pickle
 
 from implementation import *
+from helpers import *
 
-# from sklearn import linear_model
 from sklearn.linear_model import LogisticRegressionCV
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.datasets import load_iris
 
 import nltk
 import ssl
-from nltk import word_tokenize,sent_tokenize
 
 
-# clf = LogisticRegressionCV(cv=5, random_state=0, max_iter=500).fit(X, y)
-# clf.predict(X[:2, :])
-# clf.predict_proba(X[:2, :]).shape
-# print(clf.score(X, y))
-
-# linear_model.LogisticRegressionCV(class_weight='balanced',
-#                                                  scoring='roc_auc',
-#                                                  n_jobs=FLAGS.n_jobs,
-#                                                  max_iter=10000, verbose=1)
-
-# X.shape = (N,D), y.shape=(1,N)
-def test_reg_logistic_regression(X_train,y_train,X_test,k_fold,max_iter):
+def test_reg_logistic_regression(X_train,y_train,X_test_local, X_test,k_fold,max_iter):
 
     """
     It runs regularized logistic regression with cross validation of k_fold and maximum iteration max_iter.
     The solver used here is Limited-memory Broyden–Fletcher–Goldfarb–Shanno algorithm (L-BFGS).
     """
-
+    print('------------------------------------------------------')
+    print("Testing Regularized Logistic Regression with %d -fold cross-validation..." %(k_fold))
+    # running regularized logistic regression with k_fold cross validation
     clf = LogisticRegressionCV(Cs=10, class_weight=None, cv=k_fold, dual=False,
                      fit_intercept=True, intercept_scaling=1.0, l1_ratios=None,
                      max_iter=max_iter, multi_class='auto', n_jobs=None,
                      penalty='l2', random_state=0, refit=True, scoring=None,
                      solver='liblinear', tol=0.0001, verbose=0).fit(X_train, y_train)
-    prediction = clf.predict(X_test)
 
-    # print(clf.score(X, y))
+    # finding the accuracy of the model based on the partial training data
+    prediciton = clf.predict(X_test_local)
+    acc = 100 * (np.sum(prediciton == y_test)) / len(y_test)
+    print('Accuracy of the model: {0:f}'.format(acc))
+    print('------------------------------------------------------')
+    # creating the prediction of the test data
+    prediction = clf.predict(X_test)
     return prediction
 
 
-def step1(PIK_train, PIK_test):
-    train_neg = pd.read_csv("data/twitter-datasets/train_neg.txt", sep="asdfgsdgsdfgsgsdg", header=None,
-                            engine='python')
-    train_pos = pd.read_csv("data/twitter-datasets/train_pos.txt", sep="asdfgsdgsdfgsgsdg", header=None,
-                            engine='python')
-
-    test_data = pd.read_csv("data/twitter-datasets/test_data.txt", sep="asdfgsdgsdfgsgsdg", header=None,
-                            engine='python')
-
-    # print(train_neg.loc[10])
-    train_neg[0] = preprocessing(train_neg[0])
-    train_pos[0] = preprocessing(train_pos[0])
-
-    test_data[0] = preprocessing(test_data[0])
-    #
-    train_neg[0] = train_neg[0].apply(nltk.word_tokenize)
-    train_pos[0] = train_pos[0].apply(nltk.word_tokenize)
-
-    test_data[0] = test_data[0].apply(nltk.word_tokenize)
-
-    #
-    df_list_train = [train_neg[0], train_pos[0]]
-    full_df_train = pd.concat(df_list_train, ignore_index=True)
-    #
-    with open(PIK_train, "wb") as f:
-        pickle.dump(full_df_train, f)
-    with open(PIK_test, "wb") as f:
-        pickle.dump(test_data, f)
-    # print(len(train_neg[0]),len(train_pos[0]),len(test_data),len(df_list_train))
-    return len(train_neg[0]),len(train_pos[0]),len(test_data)
-    # print(train_neg[0])
-    #
-    # train_test_split
-    # df_list_train = [train_neg[0], train_pos[0]]
-    # full_df_train = pd.concat(df_list_train, ignore_index=True)
-    #
-    # shuffling the rows of dataframe
-    # full_df_train = full_df_train.sample(frac=1)
-    # full_df_test = test_data.sample(frac=1)
-    # print(full_df_test.shape,full_df_test)
-
-
-if __name__ == '__main__':
-    print("Loading Data...")
+def generate_RegLogRegression_train_test_data(NEG_TRAIN_PATH,POS_TRAIN_PATH,TEST_PATH,TO_SAVE_TRAIN, TO_SAVE_TEST):
 
     # try:
     #     _create_unverified_https_context = ssl._create_unverified_context
@@ -97,43 +48,72 @@ if __name__ == '__main__':
     #     ssl._create_default_https_context = _create_unverified_https_context
     # nltk.download('punkt')
 
-    PIK_train = "step1_train.dat"
-    PIK_test = "step1_test.dat"
-    # step1(PIK_train,PIK_test)
+    print('Generating data for regularized logistic regression...')
 
-    # with open(PIK_train, "rb") as f:
-    #     full_df_train = pickle.load(f)
-    # with open(PIK_test, "rb") as f:
-    #     full_df_test = pickle.load(f)
-    with open(PIK_train, "rb") as f:
-        full_df_train = pickle.load(f)
-    y_neg = np.zeros(100000)
-    y_pos = np.ones(100000)
+    # reading negative and positive input twitter train data
+    train_neg = pd.read_csv(NEG_TRAIN_PATH, sep="asdfgsdgsdfgsgsdg", header=None,
+                            engine='python')
+    train_pos = pd.read_csv(POS_TRAIN_PATH, sep="asdfgsdgsdfgsgsdg", header=None,
+                            engine='python')
+    # reading twitter test data
+    test_data = pd.read_csv(TEST_PATH, sep="asdfgsdgsdfgsgsdg", header=None,
+                            engine='python')
+
+    # preprocessing of the train and test data
+    train_neg[0] = preprocessing(train_neg[0])
+    train_pos[0] = preprocessing(train_pos[0])
+
+    test_data[0] = preprocessing(test_data[0])
+    #tokenizing the train and test data; changing the strings into word list
+    train_neg[0] = train_neg[0].apply(nltk.word_tokenize)
+    train_pos[0] = train_pos[0].apply(nltk.word_tokenize)
+
+    test_data[0] = test_data[0].apply(nltk.word_tokenize)
+
+    #merging positive and negative tweets and converting to list
+    df_list_train = [train_neg[0], train_pos[0]]
+    full_df_train = pd.concat(df_list_train, ignore_index=True)
+
+    df_list_test = [test_data[0]]
+    full_df_test = pd.concat(df_list_test, ignore_index=True)
+
+    #creating and merging training y matrix for negative and positive tweets: 0 for negative and 1 for positive
+    y_neg = np.zeros(len(train_neg))
+    y_pos = np.ones(len(train_pos))
     y_t = np.concatenate((y_neg, y_pos), axis=0)
 
-    #
-    # print(full_df_train)
-    full_df_train = full_df_train.map(lambda x:' '.join(x))
-
-    contents = list(full_df_train)
-
+    # creating features of each tweet based on its frequency in the train data
+    full_df_train = full_df_train.map(lambda x: ' '.join(x))
     vectorizer = TfidfVectorizer(stop_words='english', min_df=5)
-    # vectorizer = TfidfVectorizer()
-    train_data = vectorizer.fit_transform(contents)
-    # print(train_data.shape)
-    # creating test train matrixes
-    X_train, X_test, y_train, y_test = train_test_split(train_data, y_t, test_size = 0.2, random_state = 42)
+    train_data = vectorizer.fit_transform(list(full_df_train))
 
-    # train_pos, train_neg, test, glove_embedings = load_data()
-    # print(train_pos)
-    # print("Data Loaded...")
-    # exit(0)
-    # X, y = load_iris(return_X_y=True)
-    # print(y.shape, X.shape)
+    # creating train and test matrixes for model training and local testing
+    X_train, X_test, y_train, y_test = train_test_split(train_data, y_t, test_size=0.2, random_state=42)
 
-    # print(y)
-    print("running regularized logistic regression")
-    prediciton = test_reg_logistic_regression(X_train=X_train, y_train=y_train, X_test=X_test, k_fold=5,                                    max_iter=500)
-    print(prediciton)
-    acc = 100* (np.sum(prediciton == y_test))/ len(y_test)
-    print(acc)
+    # creating features of each tweet based on its frequency in the test data
+    full_df_test = full_df_test.map(lambda x: ' '.join(x))
+    test_data_final = vectorizer.transform(list(full_df_test))
+
+    return X_train, X_test, y_train, y_test, test_data_final
+
+
+if __name__ == '__main__':
+    NEG_TRAIN_PATH = "data/twitter-datasets/train_neg.txt"
+    POS_TRAIN_PATH = "data/twitter-datasets/train_pos.txt"
+    TEST_PATH = "data/twitter-datasets/test_data.txt"
+
+    TO_SAVE_TRAIN = 'train.npz'
+    TO_SAVE_TEST = 'test.arr'
+
+    X_train, X_test, y_train, y_test, test_data_final = generate_RegLogRegression_train_test_data(NEG_TRAIN_PATH,
+                                                                                                  POS_TRAIN_PATH,
+                                                                                                  TEST_PATH,
+                                                                                                  TO_SAVE_TRAIN,
+                                                                                                  TO_SAVE_TEST)
+
+    print("Data generated...")
+
+    prediciton = test_reg_logistic_regression(X_train=X_train, y_train=y_train, X_test_local=X_test, X_test=test_data_final, k_fold=5,                                    max_iter=500)
+    prediciton[prediciton == 0] = -1
+    ids = range(1,1+len(prediciton))
+    create_csv_submission(ids, prediciton, "prediction.csv")
