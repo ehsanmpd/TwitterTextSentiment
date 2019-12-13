@@ -6,6 +6,7 @@ from implementation import *
 from helpers import *
 
 from sklearn.linear_model import LogisticRegressionCV
+from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -17,7 +18,6 @@ def test_reg_logistic_regression(X_train,y_train,X_test_local, X_test,k_fold,max
 
     """
     It runs regularized logistic regression with cross validation of k_fold and maximum iteration max_iter.
-    The solver used here is Limited-memory Broyden–Fletcher–Goldfarb–Shanno algorithm (L-BFGS).
     """
     print('------------------------------------------------------')
     print("Testing Regularized Logistic Regression with %d -fold cross-validation..." %(k_fold))
@@ -29,8 +29,8 @@ def test_reg_logistic_regression(X_train,y_train,X_test_local, X_test,k_fold,max
                      solver='liblinear', tol=0.0001, verbose=0).fit(X_train, y_train)
 
     # finding the accuracy of the model based on the partial training data
-    prediciton = clf.predict(X_test_local)
-    acc = 100 * (np.sum(prediciton == y_test)) / len(y_test)
+    prediction = clf.predict(X_test_local)
+    acc = 100 * (np.sum(prediction == y_test)) / len(y_test)
     print('Accuracy of the model: {0:f}'.format(acc))
     print('------------------------------------------------------')
     # creating the prediction of the test data
@@ -38,7 +38,28 @@ def test_reg_logistic_regression(X_train,y_train,X_test_local, X_test,k_fold,max
     return prediction
 
 
-def generate_RegLogRegression_train_test_data(NEG_TRAIN_PATH,POS_TRAIN_PATH,TEST_PATH,TO_SAVE_TRAIN, TO_SAVE_TEST):
+def test_SVM(X_train,y_train,X_test_local, X_test):
+
+    """
+    It runs SVM.
+    """
+
+    print('------------------------------------------------------')
+    print("Testing SVM...")
+    clf = LinearSVC(random_state=0, tol=1e-5)
+    # fitting the train data into the SVM model
+    clf.fit(X_train, y_train)
+    # finding the accuracy of the model based on the partial training data
+    prediction = clf.predict(X_test_local)
+    acc = 100 * (np.sum(prediction == y_test)) / len(y_test)
+    print('Accuracy of the model: {0:f}'.format(acc))
+    print('------------------------------------------------------')
+    # creating the prediction of the test data
+    prediction = clf.predict(X_test)
+    return prediction
+
+
+def generate_baseline_train_test_data(NEG_TRAIN_PATH,POS_TRAIN_PATH,TEST_PATH,TO_SAVE_TRAIN, TO_SAVE_TEST):
 
     # try:
     #     _create_unverified_https_context = ssl._create_unverified_context
@@ -48,7 +69,7 @@ def generate_RegLogRegression_train_test_data(NEG_TRAIN_PATH,POS_TRAIN_PATH,TEST
     #     ssl._create_default_https_context = _create_unverified_https_context
     # nltk.download('punkt')
 
-    print('Generating data for regularized logistic regression...')
+    print('Generating data for baseline models...')
 
     # reading negative and positive input twitter train data
     train_neg = pd.read_csv(NEG_TRAIN_PATH, sep="asdfgsdgsdfgsgsdg", header=None,
@@ -105,7 +126,7 @@ if __name__ == '__main__':
     TO_SAVE_TRAIN = 'train.npz'
     TO_SAVE_TEST = 'test.arr'
 
-    X_train, X_test, y_train, y_test, test_data_final = generate_RegLogRegression_train_test_data(NEG_TRAIN_PATH,
+    X_train, X_test, y_train, y_test, test_data_final = generate_baseline_train_test_data(NEG_TRAIN_PATH,
                                                                                                   POS_TRAIN_PATH,
                                                                                                   TEST_PATH,
                                                                                                   TO_SAVE_TRAIN,
@@ -113,7 +134,16 @@ if __name__ == '__main__':
 
     print("Data generated...")
 
-    prediciton = test_reg_logistic_regression(X_train=X_train, y_train=y_train, X_test_local=X_test, X_test=test_data_final, k_fold=5,                                    max_iter=500)
+    # testing regularized logistic regression
+    prediciton = test_reg_logistic_regression(X_train=X_train, y_train=y_train, X_test_local=X_test, X_test=test_data_final, k_fold=5, max_iter=500)
+    # write the prediction output of regularized logistic regression
     prediciton[prediciton == 0] = -1
-    ids = range(1,1+len(prediciton))
-    create_csv_submission(ids, prediciton, "prediction.csv")
+    ids = range(1, 1 + len(prediciton))
+    create_csv_submission(ids, prediciton, "prediction_RLR.csv")
+
+    # testing SVM
+    prediciton = test_SVM(X_train=X_train, y_train=y_train, X_test_local=X_test, X_test=test_data_final)
+    # write the prediction output of SVM
+    prediciton[prediciton == 0] = -1
+    ids = range(1, 1 + len(prediciton))
+    create_csv_submission(ids, prediciton, "prediction_SVM.csv")
