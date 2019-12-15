@@ -48,23 +48,22 @@ Emojis are commonly used in the messaging applications to express feeling or to 
 \subsection{Removing numbers}
 In the tweets, one may use some numbers; however, the numbers do not express the absolute sentiment of a tweet. One arbitrary value of a number can express positive or negative tweet. Consider the two sentences "I bought $1$ car" and "I have $1$ CHF", where both are using the number $1$. The former is expressing a positive feeling from a user informing they bought a car, while the later is considered as a negative one showing sadness of having little money. Here, we decided to remove the numbers, as they do not really expressing the sentiment of a tweet.
 \subsection{Removing tags}
-We have noticed the the files, two tags <user> and <url>, expressing the Twitter ID of a user and a URL\footnote{Uniform Resource Locator} of an external resource. They are not informative in the term of emotions; therefore, we removed them from the two input files.
+We have noticed the the files, two tags $<$user$>$ and $<$url$>$, expressing the Twitter ID of a user and a URL\footnote{Uniform Resource Locator} of an external resource. They are not informative in the term of emotions; therefore, we removed them from the two input files.
 \subsection{Removing stop-words}
-A stop-word is a commonly used word such as "the", "a", "an", "in", to name but a few. These words not only do not help improving the classification, but also increase the feature space that is fed into the model. Therefore, we removed the stop-words which in turn caused an increase in the speed of model learning phase.
+A stop-word is a commonly used word such as "the", "a", "an", "in", to name but a few. These words not only do not help improving the classification, but also increase the feature space that is fed into the model. Therefore, we removed the stop-words using the set of stop-words in the NLTK library; this in turn caused an increase in the speed of model learning phase.
 
 \section{Feature representation}\label{sec:embedding}
-In the previous section, we capture the useful words in each tweet. The next main step to prepare the data for the training phase is to exploit the features of each word in a tweet. This technique is called "word embedding" in the context of Natural Language Processing research. Word embedding is a mathematical embedding from a space with many dimensions per word to a continuous vector space with a much lower dimension. 
+In the previous section, we captured the useful words in each tweet. The goal of this section is to find a numerical feature representation for each tweet. We mainly focused on two methods namely, tf-idf vectors and word embedding. We describe them in details as follow. 
+\subsection{tf-idf vectors}
+tf-idf is a document-term matrix in which each row represents a document (tweet in this project) and each column represent a term (word). For each row, only the terms in the corresponding document have a non-zero value; the value is a product of the term frequency and the inverse document frequency. The term frequency shows how frequent a term is in a document and the inverse document frequency indicates in how many documents the term is used.
+\subsection{Word embedding}
+Word embedding is a well-known method in the context of Natural Language Processing research to numerically represent the words. In fact, it is a mathematical embedding from a space with many dimensions per word to a continuous vector space with a much lower dimension. 
 
-To obtain such an embedding, firstly, we split each tweet into a vector of words. Then, we assign an id for each individual word, so that we convert each tweet into a vector of word ids. Secondly, we obtain an embedding of each word using pre-existing public word embedding solution, called GloVe \footnote{http://nlp.stanford.edu/projects/glove/}. There are three dimensions for GloVe that are $20$, $100$, and $300$. Although increasing the dimensionality of the embedding improves the accuracy of model, it also increases the time required to train a model. \textcolor{red}{In this project, we started with low-dimension embedding; however, for our final result, we use GloVe with $300$ dimensions to obtain a better result. The details comparison of the results are mentioned in Section \ref{sec:results}.}
+Training word embeddings is a cumbersome task as it should be trained on huge data-sets and hence requires a lot of training time. Therefore, we decided to use a pre-trained set of word embeddings, called GloVe\footnote{http://nlp.stanford.edu/projects/glove/}. There are three dimensions for GloVe that are $20$, $100$, and $300$. Although increasing the dimensionality of the embedding improves the accuracy of model, it also increases the time required to train a model. \textcolor{red}{In this project, we started with low-dimension embedding; however, for our final result, we use GloVe with $300$ dimensions to obtain a better result. The detailed comparison of the results are mentioned in Section \ref{sec:results}.}
 
-\textcolor{red}{At the end of this step, we generated one vector of word ids for each tweet and a matrix for the vocabulary of the used words in the tweets where row $n$ of the matrix is an embedding for a word with id $n$.}
+At the end, each tweet is represented as a sequence of word embeddings to be fed into our deep learning model.
+%\textcolor{red}{At the end of this step, we generated one vector of word ids for each tweet and a matrix for the vocabulary of the used words in the tweets where row $n$ of the matrix is an embedding for a word with id $n$.}
 
-%\begin{enumerate}
-%	\item tokenizing the tweets
-%	\item assign numbers for each individual word, then for each tweet we have a sequence of numbers
-%	\item for each word, we obtain an embedding this is already existed (like GloVe)
-%	\item The obtained (tweet,numbering) pairs and (word, embedding vector) pairs are fed into one layer of neural network.
-%\end{enumerate}
 %\begin{itemize}
 %	\item a
 %\end{itemize}
@@ -94,22 +93,14 @@ To obtain such an embedding, firstly, we split each tweet into a vector of words
 %	\label{tab:6model_accuracy}
 %\end{table}
 
-We consider Regularized Logistic Regression (RLR) and Support Vector Machine (SVM) as two baseline methods. The main features of them are simplicity of implementation and fast training.
-
-tfidf: tfidf is a document-term matrix in which each row represents a document (tweet in this project) and each column represent a term (word). For each row, only the terms in the corresponding document have a non-zero value; the value is a product of the term frequency and the inverse document frequency. The term frequency shows how frequent a term is in a document and the inverse document frequency indicates in how many documents the term is used.
+We consider regularized logistic regression and support vector machine as two baseline methods. The main features of them are simplicity of implementation and fast training. In both methods, we use tf-idf as feature representation.
 
 \subsection{Regularized Logistic Regression}
-This method is known to be used for classification purposes. We also rediscovered that in the first project of the course where RLR provide better accuracy in comparison with others including least square and regularized ridge regression. Therefore, we selected this method as one of the baseline methods. \textcolor{red}{The input should be described here. details of implementation is provided in Section \ref{sec:results}}
+Regularized Logistic Regression (RLR) is known to be used for classification purposes. We also rediscovered this in the first project of the course where RLR provide better accuracy in comparison with others including least square and regularized ridge regression. Therefore, we selected this method as one of the baseline methods. The numerical evaluation of the method is provided in Section \ref{sec:results}.
 
 
 \subsection{Support Vector Machine}
-SVMs methods are used for both regression and classification problems, specifically in the classification ones, they provide a maximum-margin decision boundary, which in turn causes the classification to be more robust. \textcolor{red}{The input should be described here. details of implementation is provided in Section \ref{sec:results}}
-
-
-
-SVM is an 
-
-\textcolor{red}{details of implementation is provided in Section \ref{sec:results}}
+Support Vector Machines (SVMs) are used for both regression and classification problems; specifically, they provide a maximum-margin decision boundary in the classification problem, which in turn causes the classification to be more robust. Details of implementation is provided in Section \ref{sec:results}.
 %\begin{table*}[ht]
 %	\caption{Experimental results of using different deep learning and baseline methods.}
 %	\def\arraystretch{1.1}\tabcolsep 5.2pt
@@ -143,17 +134,28 @@ SVM is an
 %\vspace{-0.5cm}
 
 \section{Deep Learning} \label{sec:deeplearning}
-Deep learning allows computational models that are composed of multiple processing layers in order to learn representations of data with multiple levels of abstraction \cite{deeplearning}. We provide three deep learning architectures namely convolutional, gated recurrent neural network and long short-term memory. In the all aforementioned architectures, we have the following general layers:
+Deep learning allows computational models that are composed of multiple processing layers in order to learn representations of data with multiple levels of abstraction \cite{deeplearning}. We provide three deep learning architectures namely convolutional, gated recurrent neural network and long short-term memory. 
+
+In the all aforementioned architectures, we have the following general layers:
 \begin{itemize}
-	\item The first layer of is an Embedding layer that we inject an embedding matrix produced from word embeddings to the model (Section \ref{sec:embedding})
+	\item The first layer of is an embedding layer. We initialize the weights of this layer with GloVe word embeddings (Section \ref{sec:embedding}). It it noteworthy to mention that these weights are still trainable and may change during the training phase.
 	\item There are multiple layers corresponding to each deep learning architecture described later in this section.
 	\item The one before the last layer is the drop-out layer. The goal of this layer is avoid over-fitting by dropping randomly a defined fraction of the hidden units in each iteration. In other words, since the number of learned parameters is increased in deep learning methods, it causes over-fitting of the model; drop-out layer is a solution to this issue. 
 	\item The last layer is the dense layer which is a fully connected network; this layer generates the final prediction for the sentiment of the tweets. 
 \end{itemize}
-
+Moreover, we use categorical cross entropy as the loss function for all the aforementioned architectures as the goal is to solve a classification problem.
 
 \subsection{Convolutional neural network}
-Convolutional neural networks (CNN) use multiple layers with convolving filters that are applied to local features. In our CNN implementation, we have $5$ layers and we describe each one below:
+Convolutional neural networks (CNN) use multiple layers with convolving filters that are applied to local features. In our CNN implementation, we have only one convolutional layer followed by a max pooling layer:
+%$5$ layers where we already mentioned three of them; here, we describe the other two layers coming after the embedding layer.
+\begin{itemize}
+	\item The convolutional layer: it uses a filter size of $3$ implying that it extracts the local features around each word window with the size of $3$. The activation function of this layer is a rectified linear unit (ReLU). 
+	\item The max pooling layer: It extracts the most important features in the feature map obtained from the convolutional layer.
+\end{itemize}
+
+	
+	
+	
 
 %\begin{itemize}
 %	\item The first layer of is an Embedding layer that we inject an embedding matrix produced from word embeddings to the model (Section \ref{sec:embedding})
@@ -164,7 +166,7 @@ Convolutional neural networks (CNN) use multiple layers with convolving filters 
 %\end{itemize}
 
 \subsection{Recurrent neural network}
-The idea behind RNNs is to make use of sequential information. In a traditional neural network we assume that all inputs (and outputs) are independent of each other. But for many tasks that’s a very bad idea. If you want to predict the next word in a sentence you better know which words came before it. RNNs are called recurrent because they perform the same task for every element of a sequence, with the output being depended on the previous computations and you already know that they have a “memory” which captures information about what has been calculated so far.
+Recurrent Neural Network (RNN) can effectively make use of sequential information. In a traditional neural network we assume that all inputs (and outputs) are independent of each other; however, for many tasks, there is no such independence. For example, if the goal is to predict the next word in a sentence, it is important to know which words came before it. RNNs are called recurrent because they perform the same task for every element of a sequence that is illustrated in Figure \ref{fig:rnn}. RNNs have a “memory” which captures information about what has been calculated so far. Therefore the output of RNNs are dependent on the previous computations.
 	\begin{figure}[t]
 	\centering
 	\includegraphics[width=0.9 \linewidth]{fig/rnn.png}
@@ -179,10 +181,14 @@ The idea behind RNNs is to make use of sequential information. In a traditional 
 %	\item[(F5)] $CT^2$: square of the cross term
 %\end{itemize}
 
-\subsubsection{Gated recurrent neural network}
-
+We have implemented two common forms of recurrent layers, namely gated recurrent units and long short-term memory.
 \subsubsection{Long Short-Term Memory}
-LSTM’s have a Nature of Remembering information for a long periods of time is their Default behaviour.
+LSTM’s have a Nature of Remembering information for a long periods of time in their Default behaviour. Therefore they help to extract dependencies between further words within a document. They consist of three gate called forget gate, input gate and output gate. Forget gate decides how much of the past should be remembered. Input gate decides how much of the current LSTM unit should be added to the current state and output gate decides which part of the current unit makes it to the output (which will be fed to the next LSTM layer). 
+
+In addition to the aforementioned advantage, they also help to overcome the vanishing gradient issue which is a common issue with RNNs.
+
+\subsubsection{Gated recurrent neural network}
+Gated Recurrent Unit aims to solve the vanishing gradient problem which comes with a standard recurrent neural network. GRU can also be considered as a variation on the LSTM as they are both designed in a similar fashion. GRU consists of two main gates, namely the update gate and the reset gate. The former helps the model to determine how much of the past information (from previous time steps) needs to be passed along to the future and the latter is used to decide how much of the past information to forget. 
 \section{Results \& Discussion} \label{sec:results}
 \begin{table}[t]
 	\centering
