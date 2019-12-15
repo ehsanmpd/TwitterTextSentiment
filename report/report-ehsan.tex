@@ -29,7 +29,7 @@
 
 \begin{abstract}
 	Classification of Twitter message has been studied in the recent years in order to understand the sentiment of the messages as positive or negative ones.
-	In this work, we use \textcolor{red}{type of neural net} neural networks to classify the sentiment of twitter messages. We use GloVe embedding to obtain feature matrix for the messages. In the proposed model, we construct a neural network by combining \textcolor{red}{CNN and RNN??} layers. The results show an improvement of $??$\% in the classification accuracy in comparison with regularized logistic regression. Finally, submitting our results in aicrowd.com shows $??$\% classification accuracy and $??$ F1-score.
+	In this work, we use \textcolor{red}{type of neural net} neural networks to classify the sentiment of twitter messages. We use GloVe embedding to obtain feature matrix for the messages. In the proposed model, we construct a neural network by combining \textcolor{red}{CNN and RNN??} layers. The results show an improvement of $??$\% in the classification accuracy in comparison with regularized logistic regression. Finally, submitting our results in aicrowd.com shows \textcolor{red}{$84.4$}\% classification accuracy and \textcolor{red}{$0.85$} F1-score.
 \end{abstract}
 %\vspace{-0.3cm}
 \section{Introduction}
@@ -52,7 +52,7 @@ We have noticed the the files, two tags <user> and <url>, expressing the Twitter
 \subsection{Removing stop-words}
 A stop-word is a commonly used word such as "the", "a", "an", "in", to name but a few. These words not only do not help improving the classification, but also increase the feature space that is fed into the model. Therefore, we removed the stop-words which in turn caused an increase in the speed of model learning phase.
 
-\section{Feature representation}
+\section{Feature representation}\label{sec:embedding}
 In the previous section, we capture the useful words in each tweet. The next main step to prepare the data for the training phase is to exploit the features of each word in a tweet. This technique is called "word embedding" in the context of Natural Language Processing research. Word embedding is a mathematical embedding from a space with many dimensions per word to a continuous vector space with a much lower dimension. 
 
 To obtain such an embedding, firstly, we split each tweet into a vector of words. Then, we assign an id for each individual word, so that we convert each tweet into a vector of word ids. Secondly, we obtain an embedding of each word using pre-existing public word embedding solution, called GloVe \footnote{http://nlp.stanford.edu/projects/glove/}. There are three dimensions for GloVe that are $20$, $100$, and $300$. Although increasing the dimensionality of the embedding improves the accuracy of model, it also increases the time required to train a model. \textcolor{red}{In this project, we started with low-dimension embedding; however, for our final result, we use GloVe with $300$ dimensions to obtain a better result. The details comparison of the results are mentioned in Section \ref{sec:results}.}
@@ -68,7 +68,9 @@ To obtain such an embedding, firstly, we split each tweet into a vector of words
 %\begin{itemize}
 %	\item a
 %\end{itemize}
-\section{Model training}\label{sec:model}
+%\section{Model training}\label{sec:model}
+%In this section, we provide a description of the methods we have implemented to classify the tweets. We first describe Regularized Logistic Regression and Support Vector Machine  as the baseline methods; further, we focus more on the neural network methods since they are able to take into account the word sequence. The methods include Convolutional Neural Network (CNN) and Gated Recurrent Neural Network.
+\section{Baseline} \label{sec:baseline}
 %\begin{table}[t]
 %	\centering
 %	\caption{Comparison of accuracy over six different method of data training with maximum $500$ iterations.}
@@ -92,8 +94,24 @@ To obtain such an embedding, firstly, we split each tweet into a vector of words
 %	\label{tab:6model_accuracy}
 %\end{table}
 
+We consider Regularized Logistic Regression (RLR) and Support Vector Machine (SVM) as two baseline methods. The main features of them are simplicity of implementation and fast training.
+
+tfidf: tfidf is a document-term matrix in which each row represents a document (tweet in this project) and each column represent a term (word). For each row, only the terms in the corresponding document have a non-zero value; the value is a product of the term frequency and the inverse document frequency. The term frequency shows how frequent a term is in a document and the inverse document frequency indicates in how many documents the term is used.
+
+\subsection{Regularized Logistic Regression}
+This method is known to be used for classification purposes. We also rediscovered that in the first project of the course where RLR provide better accuracy in comparison with others including least square and regularized ridge regression. Therefore, we selected this method as one of the baseline methods. \textcolor{red}{The input should be described here. details of implementation is provided in Section \ref{sec:results}}
+
+
+\subsection{Support Vector Machine}
+SVMs methods are used for both regression and classification problems, specifically in the classification ones, they provide a maximum-margin decision boundary, which in turn causes the classification to be more robust. \textcolor{red}{The input should be described here. details of implementation is provided in Section \ref{sec:results}}
+
+
+
+SVM is an 
+
+\textcolor{red}{details of implementation is provided in Section \ref{sec:results}}
 %\begin{table*}[ht]
-%	\caption{Experimental results of using regularized logistic regression with with/without feature augmentation for each sub-datasets.}
+%	\caption{Experimental results of using different deep learning and baseline methods.}
 %	\def\arraystretch{1.1}\tabcolsep 5.2pt
 %	\label{tab:results}
 %		\begin{tabular}{|c|c||c|c|c||c|c|c|c||c||c|}
@@ -123,19 +141,36 @@ To obtain such an embedding, firstly, we split each tweet into a vector of words
 %\end{table*}
 %In this section, first we describe how to select an appropriate model for the test data prediction. Then, we discuss about the cross validation among the training data and the extraction of hyper-parameters, i.e., the regularization parameter ($\lambda$) and the appropriate polynomial degree, to prevent under-fitting and over-fitting of the selected model .
 %\vspace{-0.5cm}
-\subsection{Model selection}
-%To find out the model that provides the best prediction, we have tested six different methods on the original dataset. The testing procedure was done in this order: we split the train dataset into two local train and test subsets; then we train the data on the local train subset using each model and check its accuracy. The size of the local train subset is $0.8$ of the size of the provided train dataset and the rest is kept as local test subset. The results of this analysis is shown in Table \ref{tab:6model_accuracy}.
-%
-%Table \ref{tab:6model_accuracy} shows that the regularized logistic  regression provides the best accuracy among the rest. This also could theoretically be confirmed as the intrinsic of the prediction of a kind of binary classification and the (regularized) logistic regression is a perfect fit for such types of problems.
-%
-%
-%
-%
-%\subsection{Cross validation}
-%A common method to enrich the model is adding polynomial expansion of the features, i.e., addition of ${X^n}$ terms where $X$ is the original feature matrix. This allows the classifier to model nonlinear relationships among the features. However, it is necessary to find a suitable value of $n$, as if $n$ is a small integer, it causes under-fitting and if $n$ is a large one, it causes over-fitting of the model. Another parameter to control over-fitting and under-fitting is the regularization parameter $\lambda$. The technique to find appropriate value of $n$ and $\lambda$ is cross validation. In this work, we have done 4-folds cross validation to tune these parameters, denoted as hyper-parameters. 
-%
-%\subsection{Manual feature augmentation}\label{sec:man_feature}
-%The improvement of the results due to the polynomial expansion of the features encouraged us to utilize other functions that mirror the effect of each feature on the considered model. We have tested several functions to obtain better prediction, e.g. for any feature $x_i$, we added $\sqrt{x_i}$, $\sin\{x_i\}$, $\tan\{x_i\}$, $\log\{x_i\}$, and $\arctan\{x_i\}$. However, neither of them led to any improvement. Then, we focused on the addition of functions based on the \textit{cross terms} $x_i x_j$ for the features $x_i$ and $x_j$. The following is the list of the added features that results in an improvement in the prediction:
+
+\section{Deep Learning} \label{sec:deeplearning}
+Deep learning allows computational models that are composed of multiple processing layers in order to learn representations of data with multiple levels of abstraction \cite{deeplearning}. We provide three deep learning architectures namely convolutional, gated recurrent neural network and long short-term memory. In the all aforementioned architectures, we have the following general layers:
+\begin{itemize}
+	\item The first layer of is an Embedding layer that we inject an embedding matrix produced from word embeddings to the model (Section \ref{sec:embedding})
+	\item There are multiple layers corresponding to each deep learning architecture described later in this section.
+	\item The one before the last layer is the drop-out layer. The goal of this layer is avoid over-fitting by dropping randomly a defined fraction of the hidden units in each iteration. In other words, since the number of learned parameters is increased in deep learning methods, it causes over-fitting of the model; drop-out layer is a solution to this issue. 
+	\item The last layer is the dense layer which is a fully connected network; this layer generates the final prediction for the sentiment of the tweets. 
+\end{itemize}
+
+
+\subsection{Convolutional neural network}
+Convolutional neural networks (CNN) use multiple layers with convolving filters that are applied to local features. In our CNN implementation, we have $5$ layers and we describe each one below:
+
+%\begin{itemize}
+%	\item The first layer of is an Embedding layer that we inject an embedding matrix produced from word embeddings to the model (Section \ref{sec:embedding})
+%	\item The second layer is the convolutional layer with rectifier activation function. It extracts the local features around each word window with the size of $3$. 
+%	\item The third layer is the max pooling layer. It extract the most important feature in the feature map obtained from the second layer.
+%	\item The fourth is the drop-out layer. The goal of this layer is avoid over-fitting by dropping randomly a defined fraction of the hidden units in each iteration. In other words, since the number of learned parameters is increased in deep learning methods, it causes over-fitting of the model; drop-out layer is a solution to this issue. The fraction of dropping the hidden units is $0.25$ in this our CNN implementation.
+%	\item The fifth layer is the dense layer which is a fully connected network; this layer generates the final prediction for the sentiment of the tweets. 
+%\end{itemize}
+
+\subsection{Recurrent neural network}
+The idea behind RNNs is to make use of sequential information. In a traditional neural network we assume that all inputs (and outputs) are independent of each other. But for many tasks that’s a very bad idea. If you want to predict the next word in a sentence you better know which words came before it. RNNs are called recurrent because they perform the same task for every element of a sequence, with the output being depended on the previous computations and you already know that they have a “memory” which captures information about what has been calculated so far.
+	\begin{figure}[t]
+	\centering
+	\includegraphics[width=0.9 \linewidth]{fig/rnn.png}
+	\caption{An unrolled recurrent neural network. "A" is a recurrent unit (LSTM or GRU), $x_t$ is the input content and $h_t$ is the state output that is also used in the next computation round of the current state.}
+	\label{fig:rnn}
+\end{figure}
 %\begin{itemize}
 %	\item[(F1)] $CT$: cross term of two features $x_i$ and $x_j$, i.e., $x_i x_j$.
 %	\item[(F2)] $\sqrt{CT}$: root square of the cross term.
@@ -144,8 +179,33 @@ To obtain such an embedding, firstly, we split each tweet into a vector of words
 %	\item[(F5)] $CT^2$: square of the cross term
 %\end{itemize}
 
+\subsubsection{Gated recurrent neural network}
 
+\subsubsection{Long Short-Term Memory}
+LSTM’s have a Nature of Remembering information for a long periods of time is their Default behaviour.
 \section{Results \& Discussion} \label{sec:results}
+\begin{table}[t]
+	\centering
+	\caption{Experimental results of using different deep learning and baseline methods.}
+	\begin{tabular}{|c|c|c|c|c|}
+		\hline
+		\multirow{2}{*}{Model} &\multicolumn{3}{|c|}{Accuracy of GloVe dimensions} \\
+		\cline{2-4}
+	 										& dim=$25$ &dim=$50$&dim=$300$\\
+		\hline
+		LSTM & $1$\%&$1$\%&$1$\%\\
+		\hline
+		CNN &  $1$\% &$1$\%&$1$\%\\
+		\hline
+		GRU &  $1$\% &$1$\%&$1$\%\\
+		\hline
+		SVM&  $1$\% &$1$\%&$1$\%\\ 
+		\hline
+		RLR&  $1$\% &$1$\%&$1$\%\\ 
+		\hline
+	\end{tabular}
+	\label{tab:6model_accuracy}
+\end{table}
 %Table~\ref{tab:results} shows the incremental results of this project using regularized logistic regression with cross validation. The execution of cross validation for the $8$ sub-datasets results in finding $n=2$ and $\lambda=10^{-20}$ for each one. 
 %%Using these two parameters leads to a significant improvement in the accuracy of the prediction which is illustrated in Table \ref{tab:results}.
 %
@@ -157,6 +217,8 @@ To obtain such an embedding, firstly, we split each tweet into a vector of words
 
 
 \section{Conclusion} \label{sec:conclusion}
+
+For the implementation we used Keras library in python.
 %In this project, we applied regularized logistic regression to a binary classification problem in order to predict whether a particle is a signal or a background noise, based on some measured features. We also showed that data preprocessing helps to improve the results of a machine learning model by removing meaningless data. We figured out the significant effect of polynomial feature expansion and the cross validation. It is noteworthy to mention that manual addition of some functions to the model substantially increased the model accuracy. To wrap up, the polynomial expansion as well as the feature augmentation led to an average improvement of $13.89$\% in the local final prediction.
 
 \bibliographystyle{IEEEtran}
