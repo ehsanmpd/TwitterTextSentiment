@@ -39,20 +39,14 @@
 \section{Introduction}
 Twitter sentiment classification has attracted increasing research interest in recent years \cite{8700266,8924403}. The goal of the classification is to predict whether a Twitter message, called \textit{tweet}, is expressing a positive or negative feeling; therefore, it is categorized as the binary classification problems.
 
-In most of typical classification problems where we are
-dealing with real data like images or voice, first step is to find
-good feature representation for our data. Doing so is to some
-extent more convenient for image or voice data because these
-types of data are inherently stored as a matrix or vector in
-the computer, so we have already a vector representation of
-them. However, Text data are traditionally stored as ASCII
-code or other encoding in the computer. So, The first step
-here is to come up with good feature representation of the
-words that can reflect their semantics.
+In the context of classification problems dealing with real data such as images, voice, and text, it is important to whiten the input to extract invaluable data. This project focuses on the text data, and the text preprocessing is a crucial step to remove the words that are neutral or meaningless for the classification. This filtering improves the efficiency of training phase and accuracy of the classification. Next, it is mandatory to represent the  input data into a set of numerical values in order to be used for the training phase. For the text input data, a good representation is the one that reflects their semantics. 
 
-\par 
-The rest of the paper is organized as follows. In Section \ref{sec:data}, we explain the data preprocessing in order to eliminate useless data. 
+Various approaches have been proposed in order to perform feature representation. Among them, we selected term-frequency and word embedding. The former is used for the baseline methods and the later is used to fed into the deep learning approaches.
 
+Finally, the input data that are transformed into a numerical feature matrix is used for the training the model. For the baseline, we chose regularized logistic regression and support vector machine. Then, we build deep learning architectures including convolutional and recurrent neural networks. We showed at the end that the long short-term memory as type of recurrent neural networks performs better than the other methods.
+
+The rest of the paper is organized as follows. In Section \ref{sec:data}, we explain the data preprocessing in order to eliminate neutral and meaningless data. Section \ref{sec:embedding} describes the embeddings that are used in this project. The baseline methods are discussed in Section \ref{sec:baseline}. Section \ref{sec:deeplearning} describes our deep learning architecture which is our main contribution. The result of our implementation is reported in Section \ref{sec:results}. We conclude the paper in Section \ref{sec:conclusion}
+.
 %In Section \ref{sec:model}, the model selection, the cross validation phase, and feature engineering are discussed. Section \ref{sec:results} shows the results of the selected model. Finally we conclude the paper in Section V.
 
 \section{Data preprocessing}\label{sec:data}
@@ -298,9 +292,8 @@ Table \ref{tab:lstm_accuracy} reveals that although by increasing the dimensions
 
 
 \section{Conclusion} \label{sec:conclusion}
+In this project, we tackled a binary classification problem to classify the sentiment of Twitter messages. We extracted the useful information out of the given Twitter messages by removing neutral and meaningless words. Then, we explored two variant of feature representation methods namely tf-idf and word embedding. At the end, we build a few deep learning architectures and compared their accuracy with two baseline methods. The results showed that using long short-term memory recurrent neural network outperformed in comparison with the other approaches with an accuracy of $86.6$\%.
 
-For the implementation we used Keras library in python.
-%In this project, we applied regularized logistic regression to a binary classification problem in order to predict whether a particle is a signal or a background noise, based on some measured features. We also showed that data preprocessing helps to improve the results of a machine learning model by removing meaningless data. We figured out the significant effect of polynomial feature expansion and the cross validation. It is noteworthy to mention that manual addition of some functions to the model substantially increased the model accuracy. To wrap up, the polynomial expansion as well as the feature augmentation led to an average improvement of $13.89$\% in the local final prediction.
 
 \bibliographystyle{IEEEtran}
 \bibliography{library}
