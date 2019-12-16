@@ -26,16 +26,30 @@
 }
 
 \maketitle
-
 \begin{abstract}
-	Classification of Twitter message has been studied in the recent years in order to understand the sentiment of the messages as positive or negative ones.
-	In this work, we use \textcolor{red}{type of neural net} neural networks to classify the sentiment of twitter messages. We use GloVe embedding to obtain feature matrix for the messages. In the proposed model, we construct a neural network by combining \textcolor{red}{CNN and RNN??} layers. The results show an improvement of $??$\% in the classification accuracy in comparison with regularized logistic regression. Finally, submitting our results in aicrowd.com shows \textcolor{red}{$84.4$}\% classification accuracy and \textcolor{red}{$0.85$} F1-score.
+	Twitter sentiment Classification (whether they are positive or negative) have been studied in the recent years.
+	In this work, we use a deep learning architecture to classify the sentiment of twitter messages. We use GloVe embedding to obtain feature representation for the messages. In the proposed model, we construct a long short-term memory recurrent neural networks with $4$ layers. The architecture shows more than $10$\% improvement in the classification accuracy in comparison with the baseline non-deep learning methods. Finally, submitting our results in aicrowd.com shows $86.6$\% classification accuracy and $0.871$ F1-score.
 \end{abstract}
+
+%\begin{abstract}
+%	Classification of Twitter messages has been studied in the recent years in order to understand the sentiment of the messages as positive or negative ones.
+%	In this work, we use deep learning to classify the sentiment of twitter messages. We use GloVe embedding to obtain feature matrix for the messages. In the proposed model, we construct a long short-term memory recurrent neural networks with $4$ layers. The results show more than $10$\% improvement in the classification accuracy in comparison with the baseline non-deep learning methods. Finally, submitting our results in aicrowd.com shows $86.6$\% classification accuracy and $0.871$ F1-score.
+%\end{abstract}
 %\vspace{-0.3cm}
 \section{Introduction}
-Twitter sentiment classification has attracted increasing research interest in recent years \cite{8700266,8924403}.
+Twitter sentiment classification has attracted increasing research interest in recent years \cite{8700266,8924403}. The goal of the classification is to predict whether a Twitter message, called \textit{tweet}, is expressing a positive or negative feeling; therefore, it is categorized as the binary classification problems.
 
-define Twitter message as tweet
+In most of typical classification problems where we are
+dealing with real data like images or voice, first step is to find
+good feature representation for our data. Doing so is to some
+extent more convenient for image or voice data because these
+types of data are inherently stored as a matrix or vector in
+the computer, so we have already a vector representation of
+them. However, Text data are traditionally stored as ASCII
+code or other encoding in the computer. So, The first step
+here is to come up with good feature representation of the
+words that can reflect their semantics.
+
 \par 
 The rest of the paper is organized as follows. In Section \ref{sec:data}, we explain the data preprocessing in order to eliminate useless data. 
 
@@ -59,7 +73,9 @@ tf-idf is a document-term matrix in which each row represents a document (tweet 
 \subsection{Word embedding}
 Word embedding is a well-known method in the context of Natural Language Processing research to numerically represent the words. In fact, it is a mathematical embedding from a space with many dimensions per word to a continuous vector space with a much lower dimension. 
 
-Training word embeddings is a cumbersome task as it should be trained on huge data-sets and hence requires a lot of training time. Therefore, we decided to use a pre-trained set of word embeddings, called GloVe\footnote{http://nlp.stanford.edu/projects/glove/}. There are three dimensions for GloVe that are $20$, $100$, and $300$. Although increasing the dimensionality of the embedding improves the accuracy of model, it also increases the time required to train a model. \textcolor{red}{In this project, we started with low-dimension embedding; however, for our final result, we use GloVe with $300$ dimensions to obtain a better result. The detailed comparison of the results are mentioned in Section \ref{sec:results}.}
+Training word embeddings is a cumbersome task as it should be trained on huge data-sets and hence requires a lot of training time. Therefore, we decided to use a pre-trained set of word embeddings, called GloVe\footnote{http://nlp.stanford.edu/projects/glove/}. There are multiple dimensions for GloVe from the range of $25$ to $300$. Although increasing the dimensionality of the embedding improves the accuracy of model, it also increases the time required to train a model.
+% In this project, we started with low-dimension embedding; however, for our final result, we use GloVe with $300$ dimensions to obtain a better result. 
+The detailed comparison of the results are mentioned in Section \ref{sec:results}.
 
 At the end, each tweet is represented as a sequence of word embeddings to be fed into our deep learning model.
 %\textcolor{red}{At the end of this step, we generated one vector of word ids for each tweet and a matrix for the vocabulary of the used words in the tweets where row $n$ of the matrix is an embedding for a word with id $n$.}
@@ -145,7 +161,7 @@ In the all aforementioned architectures, we have the following general layers:
 \end{itemize}
 Moreover, we use categorical cross entropy as the loss function for all the aforementioned architectures as the goal is to solve a classification problem.
 
-\subsection{Convolutional neural network}
+\subsection{Convolutional neural network}\label{sec:conv}
 Convolutional neural networks (CNN) use multiple layers with convolving filters that are applied to local features. In our CNN implementation, we have only one convolutional layer followed by a max pooling layer:
 %$5$ layers where we already mentioned three of them; here, we describe the other two layers coming after the embedding layer.
 \begin{itemize}
@@ -165,7 +181,7 @@ Convolutional neural networks (CNN) use multiple layers with convolving filters 
 %	\item The fifth layer is the dense layer which is a fully connected network; this layer generates the final prediction for the sentiment of the tweets. 
 %\end{itemize}
 
-\subsection{Recurrent neural network}
+\subsection{Recurrent neural network}\label{sec:RNN}
 Recurrent Neural Network (RNN) can effectively make use of sequential information. In a traditional neural network we assume that all inputs (and outputs) are independent of each other; however, for many tasks, there is no such independence. For example, if the goal is to predict the next word in a sentence, it is important to know which words came before it. RNNs are called recurrent because they perform the same task for every element of a sequence that is illustrated in Figure \ref{fig:rnn}. RNNs have a “memory” which captures information about what has been calculated so far. Therefore the output of RNNs are dependent on the previous computations.
 	\begin{figure}[t]
 	\centering
@@ -190,28 +206,87 @@ In addition to the aforementioned advantage, they also help to overcome the vani
 \subsubsection{Gated recurrent neural network}
 Gated Recurrent Unit aims to solve the vanishing gradient problem which comes with a standard recurrent neural network. GRU can also be considered as a variation on the LSTM as they are both designed in a similar fashion. GRU consists of two main gates, namely the update gate and the reset gate. The former helps the model to determine how much of the past information (from previous time steps) needs to be passed along to the future and the latter is used to decide how much of the past information to forget. 
 \section{Results \& Discussion} \label{sec:results}
-\begin{table}[t]
+Lots of classification schemes are tested throughout this project. First, to have an estimation about the baseline, simple classifiers including SVM and Logistic regression are implemented. Table \ref{tab:baseline_accuracy} shows the accuracy for these two methods.
+\begin{table}[h]
 	\centering
-	\caption{Experimental results of using different deep learning and baseline methods.}
-	\begin{tabular}{|c|c|c|c|c|}
+	\caption{Experimental results of baseline methods using tf-idf input.}
+	\begin{tabular}{|c||c|}
 		\hline
-		\multirow{2}{*}{Model} &\multicolumn{3}{|c|}{Accuracy of GloVe dimensions} \\
-		\cline{2-4}
-	 										& dim=$25$ &dim=$50$&dim=$300$\\
+		Model &Accuracy\\
 		\hline
-		LSTM & $1$\%&$1$\%&$1$\%\\
+		Support Vector Machine&  $77.8$\% \\ 
 		\hline
-		CNN &  $1$\% &$1$\%&$1$\%\\
-		\hline
-		GRU &  $1$\% &$1$\%&$1$\%\\
-		\hline
-		SVM&  $1$\% &$1$\%&$1$\%\\ 
-		\hline
-		RLR&  $1$\% &$1$\%&$1$\%\\ 
+		Regularized Logistic Regression&  $78.4$\% \\ 
 		\hline
 	\end{tabular}
-	\label{tab:6model_accuracy}
+	\label{tab:baseline_accuracy}
 \end{table}
+
+In order to improve our classification in terms of accuracy, three deep learning architectures (CNN, GRU, and LSTM) are implemented. For feature representation, GloVe embedding with $100$ dimensions, trained on almost two billion tweets is used. In all three schemes, we enable the back-propagation parameters to trained our architectures more accurately. All networks are trained for five epochs and the one with the best validation accuracy considered to be the train model. A convolutional neural network (describe in Section \ref{sec:conv}) leads to the accuracy of $82$\%, while with GRU neural network (see Section \ref{sec:RNN}) we are able to get the accuracy of more that $85$\%. Finally, the best accuracy is obtained with LSTM method (explained in …) with the accuracy of more than $86$\%.
+\begin{table}[h]
+	\centering
+	\caption{Experimental results of deep learning methods using GloVe embedding with $100$ dimensions.}
+	\begin{tabular}{|c||c|}
+		\hline
+		Model &Accuracy\\
+		\hline
+		Convolutional Neural Network&  $82$\% \\ 
+		\hline
+		Gated Recurrent Unit&  $85.6$\% \\ 
+		\hline
+		Long Short-Term Memory&  $86.2$\% \\ 
+		\hline
+	\end{tabular}
+	\label{tab:deeplearning_accuracy}
+\end{table}
+
+At the end of previous step, we chose LSTM as the best training architecture. Then, we study the effects of using different feature vector dimension of GloVe. To do so, we trained our model with GloVe embeddings of $25$, $50$, $100$, and $200$ dimensions, that are trained on almost two billion tweets. Then, we also performed training with the GloVe embeddings with $300$ dimensions, trained on Common Crawl data-set containing about $2.2$ Million different vocabulary. 
+
+\begin{table}[h]
+	\centering
+	\caption{Experimental results of LSTM using GloVe embedding with various dimensions.}
+	\begin{tabular}{|c||c|}
+		\hline
+		GloVe dimension &Accuracy\\
+		\hline
+		$25$ &  $86$\% \\ 
+		\hline
+		$50$ &  $86.2$\% \\ 
+		\hline
+		$100$ &  $86.2$\% \\ 
+		\hline
+		$200$ &  $86.4$\% \\ 
+		\hline
+		\textbf{$300$} &  \textbf{$86.6$\%} \\ 
+		\hline
+	\end{tabular}
+	\label{tab:lstm_accuracy}
+\end{table}
+
+Table \ref{tab:lstm_accuracy} reveals that although by increasing the dimensions of feature vector, more parameters need to be learned, we are able to get more powerful and accurate learning architecture for sentiment analysis.
+
+%\begin{table}[t]
+%	\centering
+%	\caption{Experimental results of using different deep learning and baseline methods.}
+%	\begin{tabular}{|c|c|c|c|c|}
+%		\hline
+%		\multirow{2}{*}{Model} &\multicolumn{3}{|c|}{Accuracy of GloVe dimensions} \\
+%		\cline{2-4}
+%	 										& dim=$25$ &dim=$50$&dim=$300$\\
+%		\hline
+%		LSTM & $1$\%&$1$\%&$1$\%\\
+%		\hline
+%		CNN &  $1$\% &$1$\%&$1$\%\\
+%		\hline
+%		GRU &  $1$\% &$1$\%&$1$\%\\
+%		\hline
+%		SVM&  $1$\% &$1$\%&$1$\%\\ 
+%		\hline
+%		RLR&  $1$\% &$1$\%&$1$\%\\ 
+%		\hline
+%	\end{tabular}
+%	\label{tab:6model_accuracy}
+%\end{table}
 %Table~\ref{tab:results} shows the incremental results of this project using regularized logistic regression with cross validation. The execution of cross validation for the $8$ sub-datasets results in finding $n=2$ and $\lambda=10^{-20}$ for each one. 
 %%Using these two parameters leads to a significant improvement in the accuracy of the prediction which is illustrated in Table \ref{tab:results}.
 %
