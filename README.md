@@ -49,6 +49,6 @@ For this classification project, we have implemented 3 neural network models:
 - GRU
 
 ## Authors
+- Ehsan Mohammadpour  			ehsan.mohammadpour@epfl.ch
 - Fereshte Mozafari   			fereshte.mozafari@epfl.ch
 - Mohammad Vahdat    			mohammad.vahdat@epfl.ch
-- Ehsan Mohammadpour  			ehsan.mohammadpour@epfl.ch
